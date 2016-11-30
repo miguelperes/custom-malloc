@@ -8,6 +8,7 @@
 chunkStatus *head = NULL;
 chunkStatus *lastVisited = NULL;
 pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
+
 void *brkPoint0 = NULL;
 
 /* findChunk: search for the first chunk that fits (size equal or more) the request
@@ -35,6 +36,7 @@ chunkStatus* findChunk(chunkStatus *headptr, unsigned int size)
 
 
 /* splitChunk: split one big block into two. The first will have the size requested by the user.
+  	       the second will have the remainder.
      chunkStatus* ptr: pointer to the block of memory which is going to be splitted.
      unsigned int size: size requested by the user
      retval: void, the function modifies the list
@@ -88,12 +90,12 @@ chunkStatus* increaseAllocation(chunkStatus *lastVisitedPtr, unsigned int size)
 }
 
 
-/* mergeChunk: merge one freed chunk with its predecessor (in case it is free as well)
+/* mergeChunkPrev: merge one freed chunk with its predecessor (in case it is free as well)
      chunkStatus* freed: pointer to the block of memory to be freed.
      retval: void, the function modifies the list
 */
-void mergeChunk(chunkStatus *freed)
-{
+void mergeChunkPrev(chunkStatus *freed)
+{ 
   chunkStatus *prev;
   prev = freed->prev;
   
@@ -103,6 +105,24 @@ void mergeChunk(chunkStatus *freed)
     prev->next = freed->next;
     if( (freed->next) != NULL )
       (freed->next)->prev = prev;
+  }
+}
+
+/* mergeChunkNext: merge one freed chunk with the following chunk (in case it is free as well)
+     chunkStatus* freed: pointer to the block of memory to be freed.
+     retval: void, the function modifies the list
+*/
+void mergeChunkNext(chunkStatus *freed)
+{  
+  chunkStatus *next;
+  next = freed->next;
+  
+  if(next != NULL && next->available == 1)
+  {
+    freed->size = freed->size + STRUCT_SIZE + next->size;
+    freed->next = next->next;
+    if( (next->next) != NULL )
+      (next->next)->prev = freed;
   }
 }
 
@@ -140,13 +160,16 @@ int i = 0;
 */
 void *mymalloc(unsigned int _size) 
 {
-  pthread_mutex_lock(&lock);
+  //pthread_mutex_lock(&lock);
+  
   
   void *brkPoint1;
   unsigned int size = ALIGN(_size);
   int memoryNeed = MULTIPLIER * (size + STRUCT_SIZE);
   chunkStatus *ptr;
   chunkStatus *newChunk;
+
+  pthread_mutex_lock(&lock);
   brkPoint0 = sbrk(0);
   
   
@@ -154,7 +177,6 @@ void *mymalloc(unsigned int _size)
   {
     if(sbrk(memoryNeed) == (void*) -1)		//error check
     {
-      printf("### RETORNO 1: Erro ###\n");
       pthread_mutex_unlock(&lock);
       return NULL;
     }
@@ -170,7 +192,7 @@ void *mymalloc(unsigned int _size)
     //Split the chunk into two: one with size request by user, other with the remainder.
     ptr = head;
     
-    //Verify if the split is necessary
+    //Verify if the split in the first allocation is necessary
     if(MULTIPLIER > 1)  
       splitChunk(ptr, size);
 
@@ -213,7 +235,11 @@ void *mymalloc(unsigned int _size)
              (NOTE: the system version of free returns no error.)
 */
 unsigned int myfree(void *ptr) {
-	
+	//#if SYSTEM_MALLOC
+	/*free(ptr);
+	return 0;
+	#endif	
+	return 1; */
 	pthread_mutex_lock(&lock);
 	
 	chunkStatus *toFree;
@@ -222,15 +248,15 @@ unsigned int myfree(void *ptr) {
 	if(toFree >= head && toFree <= brkPoint0)
 	{
 	  toFree->available = 1;	
-	  mergeChunk(toFree);
-// 	  printList(head);
+	  mergeChunkNext(toFree);
+	  mergeChunkPrev(toFree);
 	  pthread_mutex_unlock(&lock);
 	  return 0;
 	  
 	}
 	else
 	{
-	  
+	  //#endif
 	  pthread_mutex_unlock(&lock);
 	  return 1;
 	}

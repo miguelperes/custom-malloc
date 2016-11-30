@@ -1,6 +1,6 @@
 //Defines and macros
 #define SYSTEM_MALLOC 1
-#define STRUCT_SIZE 24 //sizeof(chunkStatus) or 24 (with prev field)
+#define STRUCT_SIZE 24 
 #define MULTIPLIER 10
 #define ALIGN_SIZE 8
 #define ALIGN(size) (((size) + (ALIGN_SIZE-1)) & ~(ALIGN_SIZE-1))
