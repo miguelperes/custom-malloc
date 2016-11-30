@@ -17,3 +17,12 @@ The data structure is located before each chunk of memory, to keep track of its 
 
 ##### 2. Algorithm
 It uses the [“first fit” strategy](https://www.quora.com/What-are-the-first-fit-next-fit-and-best-fit-algorithms-for-memory-management/answer/Varun-Agrawal-1). The algorithm search the list from the beginning to end, until it finds the first big enough (greater or equal the size requested) chunk of memory (splitting it in two, in case it’s bigger than needed), and finally return its adress to the user. If there is no more space in the heap, the algorithm then extends it, using the sbrk system call. To free memory, the algorithm changes the “available” state of the chunk’s metadata (struct), releasing it to further allocation. After that, the freed chunk is merged with the previous block (if this one is also freed), this is useful to avoid memory fragmentation in small sized blocks (it can happens after some splittings).
+
+---
+
+#### Phase 2: Optimization
+
+
+**Space optimization:** Space optimization: now myfree function will merge the two adjacent chunks (adjacents to the chunk being freed at the moment), if they are available (not allocated). By doing this, I'm preventing memory fragmentation, and these blocks will be easily reallocated in the next mymalloc.
+
+**Sbrk calls:** To avoid calling sbrk() all the time, when the user first calls mymalloc (or when the heap need extension), mymalloc will allocate more memory than the amount asked. This way, it will take longer before the heap need to be extended again, and less times sbrk() will be invoked.
