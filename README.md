@@ -2,7 +2,7 @@
 A custom malloc implementation in C, made for [CSC369H (Operating Systems)](https://mcs.utm.utoronto.ca/~peters43/369/) - Fall 2014 - University of Toronto
 
 ## References
-Useful readings, suggested by the professor:
+Useful readings to better understand how memory management works:
 - [Memory API](http://pages.cs.wisc.edu/~remzi/OSTEP/vm-api.pdf)
 - [Free Space Management](http://pages.cs.wisc.edu/~remzi/OSTEP/vm-freespace.pdf)
 - [How do malloc() and free() work (StackOverflow)](http://stackoverflow.com/questions/1119134/how-do-malloc-and-free-work)
@@ -23,6 +23,6 @@ It uses the [“first fit” strategy](https://www.quora.com/What-are-the-first-
 #### Phase 2: Optimization
 
 
-**Space optimization:** Space optimization: now myfree function will merge the two adjacent chunks (adjacents to the chunk being freed at the moment), if they are available (not allocated). By doing this, I'm preventing memory fragmentation, and these blocks will be easily reallocated in the next mymalloc.
+**Space optimization:** now myfree function will merge the two adjacent chunks (adjacents to the chunk being freed at the moment), if they are available (not allocated). By doing this, I'm preventing memory fragmentation, and these blocks will be easily reallocated in the next mymalloc.
 
-**Sbrk calls:** To avoid calling sbrk() all the time, when the user first calls mymalloc (or when the heap need extension), mymalloc will allocate more memory than the amount asked. This way, it will take longer before the heap need to be extended again, and less times sbrk() will be invoked.
+**Sbrk calls:** to avoid calling sbrk() all the time, when the user first calls mymalloc (or when the heap need extension), mymalloc will allocate more memory than the amount asked. This way, it will take longer before the heap need to be extended again, and less times sbrk() will be invoked.
