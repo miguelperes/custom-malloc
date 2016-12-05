@@ -20,7 +20,7 @@ It uses the [“first fit” strategy](https://www.quora.com/What-are-the-first-
 
 ---
 
-#### Phase 2: Optimization
+#### Optimization
 
 
 **Space optimization:** now myfree function will merge the two adjacent chunks (adjacents to the chunk being freed at the moment), if they are available (not allocated). By doing this, I'm preventing memory fragmentation, and these blocks will be easily reallocated in the next mymalloc.
