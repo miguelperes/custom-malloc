@@ -9,7 +9,7 @@ Useful readings to better understand how memory management works:
 - [Hoard: A Scalable Memory Allocator for Multithreaded Applications (Berger et al.)](http://dl.acm.org/citation.cfm?id=379232)
 - [Doug Lea's article on optimizing malloc](http://gee.cs.oswego.edu/dl/html/malloc.html)
 
-## How it works
+## How this implementation works
 
 
 ##### 1. Data Structure
